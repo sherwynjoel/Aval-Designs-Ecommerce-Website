@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String
+  city      String
+  createdAt DateTime @default(now())
+
+  orders Order[]
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  category      String
+  description   String
+  price         Int
+  originalPrice Int?
+  images        String // JSON-encoded string[]
+  colors        String // JSON-encoded string[] (hex)
+  sizes         String // JSON-encoded { [size]: stockCount }
+  badges        String // JSON-encoded string[]
+  customizable  Boolean  @default(false)
+  status        String   @default("ACTIVE") // ACTIVE | DRAFT | ARCHIVED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  orderNumber String   @unique
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+
+  status        String // PROCESSING | CUSTOMIZATION | QUALITY_CHECK | PACKED | SHIPPED | OUT_FOR_DELIVERY | DELIVERED | CANCELLED | RETURNED | REFUNDED
+  paymentStatus String // PENDING | PAID | FAILED | REFUNDED
+  paymentMethod String
+
+  subtotal Int
+  discount Int @default(0)
+  shipping Int @default(0)
+  tax      Int @default(0)
+  total    Int
+
+  shippingName    String
+  shippingPhone   String
+  shippingAddress String
+  shippingCity    String
+  shippingState   String
+  shippingPincode String
+
+  customizationNotes String?
+  adminNotes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  productName   String
+  size          String
+  color         String
+  customization String? // JSON-encoded, nullable
+  quantity      Int
+  unitPrice     Int
+  total         Int
+}
