@@ -7,7 +7,21 @@ import { requireAdmin } from "@/lib/require-admin";
 
 export type ProductFormState = {
   error?: string;
+  // Echo of what was submitted, so the form can re-fill after an error
+  // (React 19 resets uncontrolled fields when a form action completes).
+  values?: Record<string, string>;
 };
+
+function echoValues(formData: FormData): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const key of ["name", "slug", "category", "description", "price", "originalPrice", "images", "colors", "sizes"]) {
+    values[key] = String(formData.get(key) ?? "");
+  }
+  for (const key of ["badge_new", "badge_bestseller", "badge_limited", "badge_sale", "customizable"]) {
+    if (formData.get(key) === "on") values[key] = "on";
+  }
+  return values;
+}
 
 function slugify(input: string) {
   return input
@@ -105,11 +119,14 @@ export async function createProductAction(
   await requireAdmin();
 
   const parsed = parseProductForm(formData);
-  if (!parsed.ok) return { error: parsed.error };
+  if (!parsed.ok) return { error: parsed.error, values: echoValues(formData) };
 
   const existing = await db.product.findUnique({ where: { slug: parsed.data.slug } });
   if (existing) {
-    return { error: `A product with the slug "${parsed.data.slug}" already exists.` };
+    return {
+      error: `A product with the slug "${parsed.data.slug}" already exists.`,
+      values: echoValues(formData),
+    };
   }
 
   await db.product.create({ data: parsed.data });
@@ -125,11 +142,14 @@ export async function updateProductAction(
   await requireAdmin();
 
   const parsed = parseProductForm(formData);
-  if (!parsed.ok) return { error: parsed.error };
+  if (!parsed.ok) return { error: parsed.error, values: echoValues(formData) };
 
   const existing = await db.product.findUnique({ where: { slug: parsed.data.slug } });
   if (existing && existing.id !== productId) {
-    return { error: `A product with the slug "${parsed.data.slug}" already exists.` };
+    return {
+      error: `A product with the slug "${parsed.data.slug}" already exists.`,
+      values: echoValues(formData),
+    };
   }
 
   await db.product.update({ where: { id: productId }, data: parsed.data });

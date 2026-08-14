@@ -28,6 +28,10 @@ export default function ProductForm({
 }) {
   const v = initialValues;
   const [state, formAction, pending] = useActionState(action, {} as ProductFormState);
+  // After a validation error the browser resets the form (React 19 form
+  // actions), so re-fill from the echoed submission when present.
+  const sv = state.values;
+  const key = state.error ?? "initial";
 
   const field = "w-full border border-charcoal-line bg-transparent px-3 py-2.5 text-sm text-charcoal-ink placeholder:text-charcoal-muted focus:border-charcoal-ink focus:outline-none";
   const label = "text-xs font-medium uppercase tracking-[0.1em] text-charcoal-muted";
@@ -37,43 +41,44 @@ export default function ProductForm({
       <div className="flex flex-col gap-5 lg:col-span-2">
         <div className="flex flex-col gap-1.5">
           <label className={label} htmlFor="name">Name</label>
-          <input id="name" name="name" required defaultValue={v?.name} className={field} />
+          <input key={key} id="name" name="name" required defaultValue={sv?.name ?? v?.name} className={field} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className={label} htmlFor="slug">Slug (optional, auto-generated from name)</label>
-            <input id="slug" name="slug" defaultValue={v?.slug} className={field} />
+            <input key={key} id="slug" name="slug" defaultValue={sv?.slug ?? v?.slug} className={field} />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className={label} htmlFor="category">Category</label>
-            <input id="category" name="category" required defaultValue={v?.category} className={field} />
+            <input key={key} id="category" name="category" required defaultValue={sv?.category ?? v?.category} className={field} />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label className={label} htmlFor="description">Description</label>
-          <textarea id="description" name="description" required rows={4} defaultValue={v?.description} className={field} />
+          <textarea key={key} id="description" name="description" required rows={4} defaultValue={sv?.description ?? v?.description} className={field} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className={label} htmlFor="price">Price (INR)</label>
-            <input id="price" name="price" type="number" min={0} required defaultValue={v?.price} className={field} />
+            <input key={key} id="price" name="price" type="number" min={0} required defaultValue={sv?.price ?? v?.price} className={field} />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className={label} htmlFor="originalPrice">Original Price (optional, for Sale)</label>
-            <input id="originalPrice" name="originalPrice" type="number" min={0} defaultValue={v?.originalPrice ?? ""} className={field} />
+            <input key={key} id="originalPrice" name="originalPrice" type="number" min={0} defaultValue={sv?.originalPrice ?? v?.originalPrice ?? ""} className={field} />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label className={label} htmlFor="images">Image URLs (one per line)</label>
           <textarea
+            key={key}
             id="images"
             name="images"
             rows={3}
-            defaultValue={v?.images.join("\n")}
+            defaultValue={sv?.images ?? v?.images.join("\n")}
             placeholder="https://images.unsplash.com/photo-..."
             className={field}
           />
@@ -81,17 +86,19 @@ export default function ProductForm({
 
         <div className="flex flex-col gap-1.5">
           <label className={label} htmlFor="colors">Colors (comma-separated hex codes)</label>
-          <input id="colors" name="colors" defaultValue={v?.colors.join(", ")} placeholder="#8a2432, #c9a24b" className={field} />
+          <input key={key} id="colors" name="colors" defaultValue={sv?.colors ?? v?.colors.join(", ")} placeholder="#8a2432, #c9a24b" className={field} />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label className={label} htmlFor="sizes">Sizes &amp; stock (one per line, &quot;Size: Quantity&quot;)</label>
           <textarea
+            key={key}
             id="sizes"
             name="sizes"
             rows={4}
             defaultValue={
-              v ? Object.entries(v.sizes).map(([s, q]) => `${s}: ${q}`).join("\n") : "S: 5\nM: 8\nL: 5"
+              sv?.sizes ??
+              (v ? Object.entries(v.sizes).map(([s, q]) => `${s}: ${q}`).join("\n") : "S: 5\nM: 8\nL: 5")
             }
             className={field}
           />
@@ -104,7 +111,7 @@ export default function ProductForm({
           <div className="mt-3 flex flex-col gap-2">
             {["new", "bestseller", "limited", "sale"].map((b) => (
               <label key={b} className="flex items-center gap-2 text-sm text-charcoal-ink capitalize">
-                <input type="checkbox" name={`badge_${b}`} defaultChecked={v?.badges.includes(b)} />
+                <input key={key} type="checkbox" name={`badge_${b}`} defaultChecked={sv ? sv[`badge_${b}`] === "on" : v?.badges.includes(b)} />
                 {b}
               </label>
             ))}
@@ -113,7 +120,7 @@ export default function ProductForm({
 
         <div className="bg-ivory p-5">
           <label className="flex items-center gap-2 text-sm text-charcoal-ink">
-            <input type="checkbox" name="customizable" defaultChecked={v?.customizable} />
+            <input key={key} type="checkbox" name="customizable" defaultChecked={sv ? sv.customizable === "on" : v?.customizable} />
             Customizable (customer can request measurements/design)
           </label>
         </div>
