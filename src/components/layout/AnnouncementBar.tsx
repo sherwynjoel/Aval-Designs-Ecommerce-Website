@@ -19,7 +19,7 @@ export default function AnnouncementBar() {
   }, []);
 
   return (
-    <div className="flex h-10 items-center justify-center bg-espresso px-4 text-center">
+    <div aria-live="polite" className="flex h-10 items-center justify-center bg-espresso px-4 text-center">
       <p
         key={index}
         className="animate-[fade-in_0.4s_ease-out] text-[0.7rem] font-medium uppercase tracking-[0.14em] text-ivory"

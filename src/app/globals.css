@@ -58,6 +58,12 @@ body {
   color: var(--color-espresso-deep);
 }
 
+/* Keyboard focus is always visible; mouse clicks stay clean. */
+:focus-visible {
+  outline: 2px solid var(--color-charcoal-ink);
+  outline-offset: 2px;
+}
+
 h1,
 h2,
 h3 {

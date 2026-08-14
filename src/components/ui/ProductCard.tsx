@@ -25,7 +25,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group">
-      <div className="relative aspect-[3/4] overflow-hidden bg-beige-surface">
+      <div className="relative aspect-[3/4] overflow-hidden bg-beige-surface transition-[box-shadow,transform] duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:-translate-y-0.5 group-hover:shadow-[0_12px_32px_-16px_rgba(20,16,12,0.22)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
         <Link
           href={`/product/${product.slug}`}
           className="absolute inset-0 z-0"
@@ -89,12 +89,12 @@ export default function ProductCard({ product }: { product: Product }) {
           </svg>
         </button>
 
-        <button
-          type="button"
-          className="absolute inset-x-3 bottom-3 translate-y-3 bg-charcoal-ink py-3 text-xs font-medium uppercase tracking-[0.14em] text-ivory opacity-0 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-y-0 group-hover:opacity-100 cursor-pointer"
+        <Link
+          href={`/product/${product.slug}`}
+          className="absolute inset-x-3 bottom-3 translate-y-3 bg-charcoal-ink py-3 text-center text-xs font-medium uppercase tracking-[0.14em] text-ivory opacity-0 transition-all duration-200 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
         >
           Quick Add
-        </button>
+        </Link>
       </div>
 
       <div className="flex flex-col gap-1.5 pt-4">
