@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AnnouncementBar from "./AnnouncementBar";
+import CartDrawer from "./CartDrawer";
 import { readCart, cartCount, CART_EVENT } from "@/lib/cart";
 
 const links = [
@@ -80,6 +81,7 @@ function CartCountBadge() {
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -132,10 +134,15 @@ export default function Navbar() {
           <Link href="/wishlist" aria-label="Wishlist" className="hidden sm:inline-flex hover:text-rose-deep transition-colors">
             <HeartIcon />
           </Link>
-          <Link href="/cart" aria-label="Cart" className="relative inline-flex hover:text-rose-deep transition-colors">
+          <button
+            type="button"
+            onClick={() => setCartOpen(true)}
+            aria-label="Cart"
+            className="relative inline-flex hover:text-rose-deep transition-colors cursor-pointer"
+          >
             <BagIcon />
             <CartCountBadge />
-          </Link>
+          </button>
           <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -168,6 +175,7 @@ export default function Navbar() {
           ))}
         </nav>
       </div>
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </header>
   );
 }

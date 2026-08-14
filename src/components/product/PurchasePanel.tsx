@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { addToCart } from "@/lib/cart";
+import { toast } from "@/lib/toast";
 
 const inr = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -61,6 +62,7 @@ export default function PurchasePanel({
       quantity,
     });
     setFeedback("Added to your bag.");
+    toast({ message: `${name} added to your bag`, actionLabel: "View Bag", actionHref: "/cart" });
   }
 
   return (

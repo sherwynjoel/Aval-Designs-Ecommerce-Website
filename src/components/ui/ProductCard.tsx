@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/products";
 import { isWishlisted, toggleWishlist, WISHLIST_EVENT } from "@/lib/wishlist";
+import { toast } from "@/lib/toast";
 import Badge from "./Badge";
 
 const inr = new Intl.NumberFormat("en-IN", {
@@ -55,17 +56,21 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <button
           type="button"
-          onClick={() =>
-            setWishlisted(
-              toggleWishlist({
-                slug: product.slug,
-                name: product.name,
-                category: product.category,
-                image: product.image,
-                price: product.price,
-              })
-            )
-          }
+          onClick={() => {
+            const added = toggleWishlist({
+              slug: product.slug,
+              name: product.name,
+              category: product.category,
+              image: product.image,
+              price: product.price,
+            });
+            setWishlisted(added);
+            toast(
+              added
+                ? { message: `${product.name} saved to wishlist`, actionLabel: "View", actionHref: "/wishlist" }
+                : { message: `${product.name} removed from wishlist` }
+            );
+          }}
           aria-pressed={wishlisted}
           aria-label={
             wishlisted ? "Remove from wishlist" : "Add to wishlist"
