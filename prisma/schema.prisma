@@ -21,12 +21,13 @@ model AdminUser {
 }
 
 model Customer {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  phone     String
-  city      String
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String
+  city         String
+  passwordHash String? // set once the customer creates an account; guest orders leave it null
+  createdAt    DateTime @default(now())
 
   orders Order[]
 }
