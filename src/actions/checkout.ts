@@ -19,6 +19,7 @@ export type CheckoutPayload = {
   state: string;
   pincode: string;
   measurementNotes?: string;
+  couponCode?: string;
   items: CheckoutItem[];
 };
 
@@ -127,9 +128,21 @@ export async function placeOrderAction(payload: CheckoutPayload): Promise<Checko
     });
   }
 
+  // Re-validate any coupon server-side; never trust a client-computed discount.
+  let discount = 0;
+  let couponId: string | null = null;
+  if (payload.couponCode?.trim()) {
+    const { validateCoupon } = await import("@/actions/coupons");
+    const check = await validateCoupon(payload.couponCode, subtotal);
+    if (!check.ok) return { ok: false, error: check.error };
+    discount = check.discount;
+    const c = await db.coupon.findUnique({ where: { code: check.code } });
+    couponId = c?.id ?? null;
+  }
+
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
-  const tax = Math.round(subtotal * TAX_RATE);
-  const total = subtotal + shipping + tax;
+  const tax = Math.round((subtotal - discount) * TAX_RATE);
+  const total = subtotal - discount + shipping + tax;
 
   const customer = await db.customer.upsert({
     where: { email },
@@ -150,7 +163,7 @@ export async function placeOrderAction(payload: CheckoutPayload): Promise<Checko
             paymentStatus: "PENDING",
             paymentMethod: "Cash on Delivery",
             subtotal,
-            discount: 0,
+            discount,
             shipping,
             tax,
             total,
@@ -170,6 +183,14 @@ export async function placeOrderAction(payload: CheckoutPayload): Promise<Checko
             data: { sizes: JSON.stringify(u.sizes) },
           })
         ),
+        ...(couponId
+          ? [
+              db.coupon.update({
+                where: { id: couponId },
+                data: { usedCount: { increment: 1 } },
+              }),
+            ]
+          : []),
       ]);
       return { ok: true, orderNumber };
     } catch (err) {

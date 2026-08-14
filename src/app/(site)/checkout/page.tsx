@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import { readCart, cartSubtotal, CART_EVENT, type CartItem } from "@/lib/cart";
 import { placeOrderAction } from "@/actions/checkout";
+import { validateCoupon } from "@/actions/coupons";
 
 const inr = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -21,6 +22,10 @@ export default function CheckoutPage() {
   const [items, setItems] = useState<CartItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponChecking, setCouponChecking] = useState(false);
 
   useEffect(() => {
     const sync = () => setItems(readCart());
@@ -48,9 +53,23 @@ export default function CheckoutPage() {
   }
 
   const subtotal = cartSubtotal(items);
+  const discount = coupon?.discount ?? 0;
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
-  const tax = Math.round(subtotal * 0.05);
-  const total = subtotal + shipping + tax;
+  const tax = Math.round((subtotal - discount) * 0.05);
+  const total = subtotal - discount + shipping + tax;
+
+  async function applyCoupon() {
+    setCouponChecking(true);
+    setCouponError(null);
+    const check = await validateCoupon(couponInput, subtotal);
+    if (check.ok) {
+      setCoupon({ code: check.code, discount: check.discount });
+    } else {
+      setCoupon(null);
+      setCouponError(check.error);
+    }
+    setCouponChecking(false);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -66,6 +85,7 @@ export default function CheckoutPage() {
       state: String(data.get("state") ?? ""),
       pincode: String(data.get("pincode") ?? ""),
       measurementNotes: String(data.get("measurementNotes") ?? ""),
+      couponCode: coupon?.code,
       items: items!.map((i) => ({
         slug: i.slug,
         size: i.size,
@@ -188,8 +208,48 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
+          <div className="mt-4 border-t border-charcoal-line pt-4">
+            {coupon ? (
+              <p className="flex items-center justify-between text-sm">
+                <span className="text-charcoal-ink">
+                  Coupon <b>{coupon.code}</b> applied
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setCoupon(null); setCouponInput(""); }}
+                  className="text-xs font-medium uppercase tracking-[0.1em] text-charcoal-muted hover:text-rose-deep cursor-pointer"
+                >
+                  Remove
+                </button>
+              </p>
+            ) : (
+              <div className="flex gap-2">
+                <label htmlFor="coupon" className="sr-only">Coupon code</label>
+                <input
+                  id="coupon"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  placeholder="Coupon code"
+                  className="w-full border-b border-charcoal-line bg-transparent px-1 py-2 text-sm uppercase text-charcoal-ink placeholder:normal-case placeholder:text-charcoal-muted focus:border-charcoal-ink focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  disabled={couponChecking || !couponInput.trim()}
+                  className="shrink-0 border border-charcoal-ink px-4 py-2 text-xs font-medium uppercase tracking-[0.1em] text-charcoal-ink hover:bg-charcoal-ink hover:text-ivory disabled:opacity-40 cursor-pointer"
+                >
+                  {couponChecking ? "..." : "Apply"}
+                </button>
+              </div>
+            )}
+            {couponError && <p role="alert" className="mt-2 text-xs text-rose-deep">{couponError}</p>}
+          </div>
+
           <div className="mt-4 flex flex-col gap-2 border-t border-charcoal-line pt-4 text-sm">
             <div className="flex justify-between text-charcoal-muted"><span>Subtotal</span><span className="tabular-nums">{inr.format(subtotal)}</span></div>
+            {discount > 0 && (
+              <div className="flex justify-between text-charcoal-muted"><span>Discount</span><span className="tabular-nums">&minus;{inr.format(discount)}</span></div>
+            )}
             <div className="flex justify-between text-charcoal-muted"><span>Shipping</span><span className="tabular-nums">{shipping === 0 ? "Free" : inr.format(shipping)}</span></div>
             <div className="flex justify-between text-charcoal-muted"><span>Tax (5%)</span><span className="tabular-nums">{inr.format(tax)}</span></div>
             <div className="flex justify-between pt-2 text-base font-medium text-charcoal-ink"><span>Total</span><span className="tabular-nums">{inr.format(total)}</span></div>

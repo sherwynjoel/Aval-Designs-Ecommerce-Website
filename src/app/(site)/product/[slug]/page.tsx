@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Badge from "@/components/ui/Badge";
 import ProductGallery from "@/components/product/ProductGallery";
 import PurchasePanel from "@/components/product/PurchasePanel";
+import ReviewsSection from "@/components/product/ReviewsSection";
 import { getProductBySlug } from "@/lib/catalog";
 
 const inr = new Intl.NumberFormat("en-IN", {
@@ -125,6 +126,8 @@ export default async function ProductDetailPage({
           </div>
         </div>
       </div>
+
+      <ReviewsSection productId={product.id} productSlug={product.slug} />
     </div>
   );
 }

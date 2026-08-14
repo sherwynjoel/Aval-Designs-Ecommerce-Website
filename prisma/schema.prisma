@@ -29,7 +29,8 @@ model Customer {
   passwordHash String? // set once the customer creates an account; guest orders leave it null
   createdAt    DateTime @default(now())
 
-  orders Order[]
+  orders  Order[]
+  reviews Review[]
 }
 
 model Product {
@@ -50,6 +51,7 @@ model Product {
   updatedAt     DateTime @updatedAt
 
   orderItems OrderItem[]
+  reviews    Review[]
 }
 
 model Order {
@@ -82,6 +84,33 @@ model Order {
   updatedAt DateTime @updatedAt
 
   items OrderItem[]
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rating     Int // 1-5
+  body       String
+  verified   Boolean  @default(false) // customer has a delivered order containing this product
+  createdAt  DateTime @default(now())
+
+  @@unique([productId, customerId])
+}
+
+model Coupon {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  kind        String // PERCENT | FIXED
+  value       Int // percent (1-100) or paise-free rupee amount
+  minSubtotal Int       @default(0)
+  expiresAt   DateTime?
+  usageLimit  Int? // null = unlimited
+  usedCount   Int       @default(0)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
 }
 
 model OrderItem {

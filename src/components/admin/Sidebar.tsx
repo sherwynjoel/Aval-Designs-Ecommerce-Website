@@ -30,6 +30,17 @@ const navItems = [
     ),
   },
   {
+    label: "Coupons",
+    href: "/admin/coupons",
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 9V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a3 3 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a3 3 0 0 0 0-6zM13 7.5v2M13 11v2M13 14.5v2"
+      />
+    ),
+  },
+  {
     label: "Customers",
     href: "/admin/customers",
     icon: (
