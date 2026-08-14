@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import Pagination, { ADMIN_PAGE_SIZE, parsePage } from "@/components/admin/Pagination";
 
 export const metadata = { title: "Customers — Aval Designs Admin" };
 
@@ -9,12 +10,18 @@ const inr = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0,
 });
 
-export default async function AdminCustomersPage() {
+export default async function AdminCustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const page = parsePage((await searchParams).page);
   const customers = await db.customer.findMany({
     include: { orders: { select: { total: true, paymentStatus: true, createdAt: true } } },
     orderBy: { createdAt: "desc" },
   });
 
+  // Spend is computed across relations, so sort in JS and paginate the sorted list.
   const rows = customers
     .map((c) => {
       const paid = c.orders.filter((o) => o.paymentStatus === "PAID");
@@ -25,7 +32,8 @@ export default async function AdminCustomersPage() {
       );
       return { ...c, orderCount: c.orders.length, totalSpent, lastOrder };
     })
-    .sort((a, b) => b.totalSpent - a.totalSpent);
+    .sort((a, b) => b.totalSpent - a.totalSpent)
+    .slice((page - 1) * ADMIN_PAGE_SIZE, page * ADMIN_PAGE_SIZE);
 
   return (
     <div className="px-8 py-8">
@@ -65,6 +73,8 @@ export default async function AdminCustomersPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} totalCount={customers.length} basePath="/admin/customers" />
     </div>
   );
 }

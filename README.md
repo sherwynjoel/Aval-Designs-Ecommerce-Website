@@ -35,8 +35,9 @@ Never commit `.env`.
 
 ## What's built
 
-- **Storefront homepage** — hero, new arrivals, shop by category, custom-design CTA, editorial banner, testimonials, Instagram gallery, newsletter, footer
-- **Admin panel** (`/admin`) — dashboard (revenue, sales trend, top products, low-stock alerts), order management with status timeline, product CRUD, customer list/detail
+- **Storefront** — homepage, shop with filters/sorting (mobile bottom-sheet filters), product pages with size guide and stock states, wishlist, search, cart, and a working Cash-on-Delivery checkout that creates real orders (with stock decrement), order confirmation, and order tracking
+- **Content pages** — collections, new arrivals, best sellers, custom-design, about, contact, FAQ, size guide, and policies
+- **Admin panel** (`/admin`) — dashboard (revenue, sales trend, top products, low-stock alerts), paginated order management with status timeline, product CRUD, customer list/detail
 
 ## Project docs
 
@@ -45,4 +46,4 @@ Never commit `.env`.
 
 ## Not yet built
 
-Shop listing/filters, product detail pages, cart, checkout, payments, customer accounts, saved measurements, custom-design uploads, coupons, shipping/tax config, and the rest of the admin analytics surface.
+Online payments (Razorpay/Stripe — checkout is COD-only today), invoice PDFs, customer accounts, saved measurements, custom-design uploads, reviews, coupons, shipping/tax config, notifications, and blog content. The database is local SQLite — move to hosted Postgres before deploying.

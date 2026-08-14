@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Product } from "@/lib/products";
+import { isWishlisted, toggleWishlist, WISHLIST_EVENT } from "@/lib/wishlist";
 import Badge from "./Badge";
 
 const inr = new Intl.NumberFormat("en-IN", {
@@ -14,6 +15,13 @@ const inr = new Intl.NumberFormat("en-IN", {
 
 export default function ProductCard({ product }: { product: Product }) {
   const [wishlisted, setWishlisted] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setWishlisted(isWishlisted(product.slug));
+    sync();
+    window.addEventListener(WISHLIST_EVENT, sync);
+    return () => window.removeEventListener(WISHLIST_EVENT, sync);
+  }, [product.slug]);
 
   return (
     <div className="group">
@@ -47,7 +55,17 @@ export default function ProductCard({ product }: { product: Product }) {
 
         <button
           type="button"
-          onClick={() => setWishlisted((w) => !w)}
+          onClick={() =>
+            setWishlisted(
+              toggleWishlist({
+                slug: product.slug,
+                name: product.name,
+                category: product.category,
+                image: product.image,
+                price: product.price,
+              })
+            )
+          }
           aria-pressed={wishlisted}
           aria-label={
             wishlisted ? "Remove from wishlist" : "Add to wishlist"

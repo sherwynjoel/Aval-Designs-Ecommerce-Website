@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { deleteProductAction } from "@/actions/admin-products";
 import ConfirmSubmitButton from "@/components/admin/ConfirmSubmitButton";
+import Pagination, { ADMIN_PAGE_SIZE, parsePage } from "@/components/admin/Pagination";
 
 export const metadata = { title: "Products — Aval Designs Admin" };
 
@@ -12,15 +13,27 @@ const inr = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0,
 });
 
-export default async function AdminProductsPage() {
-  const products = await db.product.findMany({ orderBy: { createdAt: "desc" } });
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const page = parsePage((await searchParams).page);
+  const [products, totalCount] = await Promise.all([
+    db.product.findMany({
+      orderBy: { createdAt: "desc" },
+      take: ADMIN_PAGE_SIZE,
+      skip: (page - 1) * ADMIN_PAGE_SIZE,
+    }),
+    db.product.count(),
+  ]);
 
   return (
     <div className="px-8 py-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-medium text-charcoal-ink">Products</h1>
-          <p className="mt-1 text-sm text-charcoal-muted">{products.length} products</p>
+          <p className="mt-1 text-sm text-charcoal-muted">{totalCount} products</p>
         </div>
         <Link
           href="/admin/products/new"
@@ -97,6 +110,8 @@ export default async function AdminProductsPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} totalCount={totalCount} basePath="/admin/products" />
     </div>
   );
 }

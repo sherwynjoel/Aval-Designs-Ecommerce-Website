@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { OrderStatusBadge, PaymentStatusBadge, ORDER_STATUS_OPTIONS } from "@/components/admin/StatusBadge";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
+import Pagination, { ADMIN_PAGE_SIZE, parsePage } from "@/components/admin/Pagination";
 
 export const metadata = { title: "Orders — Aval Designs Admin" };
 
@@ -14,33 +15,41 @@ const inr = new Intl.NumberFormat("en-IN", {
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
   const params = await searchParams;
   const status = params.status ?? "";
   const q = params.q?.trim() ?? "";
+  const page = parsePage(params.page);
 
-  const orders = await db.order.findMany({
-    where: {
-      ...(status ? { status } : {}),
-      ...(q
-        ? {
-            OR: [
-              { orderNumber: { contains: q } },
-              { customer: { name: { contains: q } } },
-              { customer: { email: { contains: q } } },
-            ],
-          }
-        : {}),
-    },
-    include: { customer: true, items: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const where = {
+    ...(status ? { status } : {}),
+    ...(q
+      ? {
+          OR: [
+            { orderNumber: { contains: q } },
+            { customer: { name: { contains: q } } },
+            { customer: { email: { contains: q } } },
+          ],
+        }
+      : {}),
+  };
+
+  const [orders, totalCount] = await Promise.all([
+    db.order.findMany({
+      where,
+      include: { customer: true, items: true },
+      orderBy: { createdAt: "desc" },
+      take: ADMIN_PAGE_SIZE,
+      skip: (page - 1) * ADMIN_PAGE_SIZE,
+    }),
+    db.order.count({ where }),
+  ]);
 
   return (
     <div className="px-8 py-8">
       <h1 className="font-display text-2xl font-medium text-charcoal-ink">Orders</h1>
-      <p className="mt-1 text-sm text-charcoal-muted">{orders.length} orders</p>
+      <p className="mt-1 text-sm text-charcoal-muted">{totalCount} orders</p>
 
       <form className="mt-6 flex flex-wrap items-end gap-4" method="get">
         <div className="flex flex-col gap-1.5">
@@ -133,6 +142,13 @@ export default async function AdminOrdersPage({
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        totalCount={totalCount}
+        basePath="/admin/orders"
+        searchParams={{ ...(status ? { status } : {}), ...(q ? { q } : {}) }}
+      />
     </div>
   );
 }
