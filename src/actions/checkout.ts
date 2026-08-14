@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export type CheckoutItem = {
   slug: string;
@@ -34,6 +35,15 @@ function randomOrderNumber() {
 }
 
 export async function placeOrderAction(payload: CheckoutPayload): Promise<CheckoutResult> {
+  // COD order spam protection: 5 orders per hour per IP.
+  const ip = await clientIp();
+  if (!rateLimit(`order:ip:${ip}`, { limit: 5, windowMs: 60 * 60 * 1000 })) {
+    return {
+      ok: false,
+      error: "Too many orders from this connection — please try again later or contact us on WhatsApp.",
+    };
+  }
+
   const name = payload.name?.trim();
   const email = payload.email?.trim().toLowerCase();
   const phone = payload.phone?.trim();

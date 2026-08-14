@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import Button from "@/components/ui/Button";
 import OrderTimeline from "@/components/admin/OrderTimeline";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 const inr = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -17,6 +18,23 @@ export default async function OrderConfirmationPage({
   params: Promise<{ orderNumber: string }>;
 }) {
   const { orderNumber } = await params;
+
+  // Slow down bulk order-number guessing: 30 lookups/minute per IP.
+  const ip = await clientIp();
+  if (!rateLimit(`order-lookup:${ip}`, { limit: 30, windowMs: 60 * 1000 })) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-24">
+        <h1 className="font-display text-3xl font-medium text-charcoal-ink">
+          One moment
+        </h1>
+        <p className="mt-3 text-charcoal-muted">
+          Too many lookups from this connection — please wait a minute and try
+          again.
+        </p>
+      </div>
+    );
+  }
+
   const order = await db.order.findUnique({
     where: { orderNumber },
     include: { items: true },
