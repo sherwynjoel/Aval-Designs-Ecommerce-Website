@@ -1,62 +1,38 @@
 import "server-only";
-import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import {
-  ADMIN_SESSION_COOKIE as COOKIE_NAME,
-  ADMIN_SESSION_DURATION_SECONDS as SESSION_DURATION,
+  ADMIN_SESSION_COOKIE,
+  ADMIN_SESSION_DURATION_SECONDS,
 } from "@/lib/auth-constants";
+import {
+  signAdminSessionToken,
+  verifyAdminSessionToken,
+  type AdminSessionPayload,
+} from "@/lib/session-token";
 
-function getSecret() {
-  const secret = process.env.ADMIN_SESSION_SECRET;
-  if (!secret) {
-    throw new Error("ADMIN_SESSION_SECRET is not set");
-  }
-  return new TextEncoder().encode(secret);
-}
-
-export type AdminSession = {
-  adminId: string;
-  email: string;
-  name: string;
-};
+export type AdminSession = AdminSessionPayload;
 
 export async function createAdminSession(session: AdminSession) {
-  const token = await new SignJWT(session)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(`${SESSION_DURATION}s`)
-    .sign(getSecret());
+  const token = await signAdminSessionToken(session);
 
   const store = await cookies();
-  store.set(COOKIE_NAME, token, {
+  store.set(ADMIN_SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_DURATION,
+    maxAge: ADMIN_SESSION_DURATION_SECONDS,
   });
 }
 
 export async function destroyAdminSession() {
   const store = await cookies();
-  store.delete(COOKIE_NAME);
+  store.delete(ADMIN_SESSION_COOKIE);
 }
 
 export async function getAdminSession(): Promise<AdminSession | null> {
   const store = await cookies();
-  const token = store.get(COOKIE_NAME)?.value;
+  const token = store.get(ADMIN_SESSION_COOKIE)?.value;
   if (!token) return null;
-
-  try {
-    const { payload } = await jwtVerify(token, getSecret());
-    return {
-      adminId: payload.adminId as string,
-      email: payload.email as string,
-      name: payload.name as string,
-    };
-  } catch {
-    return null;
-  }
+  return verifyAdminSessionToken(token);
 }
-
-export const ADMIN_SESSION_COOKIE = COOKIE_NAME;

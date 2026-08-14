@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { OrderStatusBadge, PaymentStatusBadge, ORDER_STATUS_OPTIONS } from "@/components/admin/StatusBadge";
+import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 
 export const metadata = { title: "Orders — Aval Designs Admin" };
 
@@ -68,7 +69,7 @@ export default async function AdminOrdersPage({
             <option value="">All statuses</option>
             {ORDER_STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {s.replaceAll("_", " ")}
+                {ORDER_STATUS_LABELS[s]}
               </option>
             ))}
           </select>

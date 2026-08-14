@@ -1,3 +1,8 @@
+"use client";
+
+import { useActionState } from "react";
+import type { ProductFormState } from "@/actions/admin-products";
+
 type ProductFormValues = {
   name: string;
   slug: string;
@@ -17,17 +22,18 @@ export default function ProductForm({
   initialValues,
   submitLabel,
 }: {
-  action: (formData: FormData) => void;
+  action: (prevState: ProductFormState, formData: FormData) => Promise<ProductFormState>;
   initialValues?: ProductFormValues;
   submitLabel: string;
 }) {
   const v = initialValues;
+  const [state, formAction, pending] = useActionState(action, {} as ProductFormState);
 
   const field = "w-full border border-charcoal-line bg-transparent px-3 py-2.5 text-sm text-charcoal-ink placeholder:text-charcoal-muted focus:border-charcoal-ink focus:outline-none";
   const label = "text-xs font-medium uppercase tracking-[0.1em] text-charcoal-muted";
 
   return (
-    <form action={action} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <form action={formAction} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="flex flex-col gap-5 lg:col-span-2">
         <div className="flex flex-col gap-1.5">
           <label className={label} htmlFor="name">Name</label>
@@ -112,11 +118,18 @@ export default function ProductForm({
           </label>
         </div>
 
+        {state.error && (
+          <p role="alert" className="text-sm text-rose-deep">
+            {state.error}
+          </p>
+        )}
+
         <button
           type="submit"
-          className="bg-charcoal-ink px-6 py-3 text-xs font-medium uppercase tracking-[0.12em] text-ivory hover:bg-espresso cursor-pointer"
+          disabled={pending}
+          className="bg-charcoal-ink px-6 py-3 text-xs font-medium uppercase tracking-[0.12em] text-ivory hover:bg-espresso disabled:opacity-50 cursor-pointer"
         >
-          {submitLabel}
+          {pending ? "Saving..." : submitLabel}
         </button>
       </div>
     </form>

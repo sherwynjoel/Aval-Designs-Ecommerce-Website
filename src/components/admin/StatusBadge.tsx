@@ -1,14 +1,20 @@
-const orderStatusConfig: Record<string, { label: string; dot: string }> = {
-  PROCESSING: { label: "Processing", dot: "bg-charcoal-muted" },
-  CUSTOMIZATION: { label: "Customization", dot: "bg-charcoal-muted" },
-  QUALITY_CHECK: { label: "Quality Check", dot: "bg-charcoal-muted" },
-  PACKED: { label: "Packed", dot: "bg-charcoal-muted" },
-  SHIPPED: { label: "Shipped", dot: "bg-gold-deep" },
-  OUT_FOR_DELIVERY: { label: "Out for Delivery", dot: "bg-gold-deep" },
-  DELIVERED: { label: "Delivered", dot: "bg-[oklch(0.6_0.11_150)]" },
-  CANCELLED: { label: "Cancelled", dot: "bg-rose-deep" },
-  RETURNED: { label: "Returned", dot: "bg-rose-deep" },
-  REFUNDED: { label: "Refunded", dot: "bg-rose-deep" },
+import {
+  ORDER_STATUSES,
+  ORDER_STATUS_LABELS,
+  isOrderStatus,
+} from "@/lib/order-status";
+
+const orderStatusDots: Record<string, string> = {
+  PROCESSING: "bg-charcoal-muted",
+  CUSTOMIZATION: "bg-charcoal-muted",
+  QUALITY_CHECK: "bg-charcoal-muted",
+  PACKED: "bg-charcoal-muted",
+  SHIPPED: "bg-gold-deep",
+  OUT_FOR_DELIVERY: "bg-gold-deep",
+  DELIVERED: "bg-[oklch(0.6_0.11_150)]",
+  CANCELLED: "bg-rose-deep",
+  RETURNED: "bg-rose-deep",
+  REFUNDED: "bg-rose-deep",
 };
 
 const paymentStatusConfig: Record<string, { label: string; dot: string }> = {
@@ -19,11 +25,12 @@ const paymentStatusConfig: Record<string, { label: string; dot: string }> = {
 };
 
 export function OrderStatusBadge({ status }: { status: string }) {
-  const config = orderStatusConfig[status] ?? { label: status, dot: "bg-charcoal-muted" };
+  const label = isOrderStatus(status) ? ORDER_STATUS_LABELS[status] : status;
+  const dot = orderStatusDots[status] ?? "bg-charcoal-muted";
   return (
     <span className="inline-flex items-center gap-1.5 text-sm text-charcoal-ink">
-      <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
-      {config.label}
+      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+      {label}
     </span>
   );
 }
@@ -38,4 +45,4 @@ export function PaymentStatusBadge({ status }: { status: string }) {
   );
 }
 
-export const ORDER_STATUS_OPTIONS = Object.keys(orderStatusConfig);
+export const ORDER_STATUS_OPTIONS = ORDER_STATUSES;

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { PaymentStatusBadge, ORDER_STATUS_OPTIONS } from "@/components/admin/StatusBadge";
+import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 import OrderTimeline from "@/components/admin/OrderTimeline";
 import { updateOrderStatusAction, updateOrderNotesAction } from "@/actions/admin-orders";
 
@@ -135,12 +136,9 @@ export default async function AdminOrderDetailPage({
               >
                 {ORDER_STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s}>
-                    {s.replaceAll("_", " ")}
+                    {ORDER_STATUS_LABELS[s]}
                   </option>
                 ))}
-                <option value="CANCELLED">Cancelled</option>
-                <option value="RETURNED">Returned</option>
-                <option value="REFUNDED">Refunded</option>
               </select>
               <button
                 type="submit"

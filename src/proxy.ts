@@ -1,21 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
 import { ADMIN_SESSION_COOKIE } from "@/lib/auth-constants";
+import { verifyAdminSessionToken } from "@/lib/session-token";
 
 async function hasValidSession(request: NextRequest) {
   const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
   if (!token) return false;
-
-  const secret = process.env.ADMIN_SESSION_SECRET;
-  if (!secret) return false;
-
-  try {
-    await jwtVerify(token, new TextEncoder().encode(secret));
-    return true;
-  } catch {
-    return false;
-  }
+  return (await verifyAdminSessionToken(token)) !== null;
 }
 
 export async function proxy(request: NextRequest) {

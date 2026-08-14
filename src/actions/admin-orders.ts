@@ -2,18 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { getAdminSession } from "@/lib/auth";
-
-async function requireAdmin() {
-  const session = await getAdminSession();
-  if (!session) throw new Error("Not authenticated");
-  return session;
-}
+import { requireAdmin } from "@/lib/require-admin";
+import { isOrderStatus } from "@/lib/order-status";
 
 export async function updateOrderStatusAction(orderId: string, formData: FormData) {
   await requireAdmin();
   const status = String(formData.get("status") ?? "");
-  if (!status) return;
+  if (!isOrderStatus(status)) return;
 
   await db.order.update({ where: { id: orderId }, data: { status } });
   revalidatePath(`/admin/orders/${orderId}`);
