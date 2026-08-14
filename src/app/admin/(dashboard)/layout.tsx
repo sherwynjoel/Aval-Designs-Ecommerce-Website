@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/auth";
+import { verifiedAdminSession } from "@/lib/require-admin";
 import Sidebar from "@/components/admin/Sidebar";
 
 export default async function AdminDashboardLayout({
@@ -7,9 +7,10 @@ export default async function AdminDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getAdminSession();
+  const session = await verifiedAdminSession();
   if (!session) {
-    redirect("/admin/login");
+    // Clears any stale-but-signed cookie to avoid a proxy redirect loop.
+    redirect("/admin/session-expired");
   }
 
   return (

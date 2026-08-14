@@ -5,7 +5,14 @@ export type AdminSessionPayload = {
   adminId: string;
   email: string;
   name: string;
+  // Tag derived from the password hash; changing the password rotates the
+  // tag, which invalidates every previously issued session token.
+  pwt: string;
 };
+
+export function passwordTag(passwordHash: string) {
+  return passwordHash.slice(-16);
+}
 
 function getSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -33,6 +40,7 @@ export async function verifyAdminSessionToken(
       adminId: payload.adminId as string,
       email: payload.email as string,
       name: payload.name as string,
+      pwt: (payload.pwt as string) ?? "",
     };
   } catch {
     return null;

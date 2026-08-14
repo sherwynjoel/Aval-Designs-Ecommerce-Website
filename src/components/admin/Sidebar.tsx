@@ -84,6 +84,12 @@ export default function Sidebar({ adminName }: { adminName: string }) {
 
       <div className="border-t border-ivory/10 px-6 py-5">
         <p className="truncate text-sm text-ivory/80">{adminName}</p>
+        <Link
+          href="/admin/settings"
+          className="mt-1 block text-xs font-medium uppercase tracking-[0.12em] text-ivory/50 transition-colors hover:text-ivory"
+        >
+          Settings
+        </Link>
         <form action={logoutAction}>
           <button
             type="submit"

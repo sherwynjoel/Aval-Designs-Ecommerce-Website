@@ -8,10 +8,11 @@ export const metadata = {
 export default async function AdminLoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; changed?: string }>;
 }) {
   const params = await searchParams;
   const next = params.next ?? "/admin";
+  const passwordChanged = params.changed === "1";
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-espresso px-6">
@@ -25,6 +26,11 @@ export default async function AdminLoginPage({
             Admin
           </p>
         </div>
+        {passwordChanged && (
+          <p className="mb-6 bg-ivory/10 px-4 py-3 text-center text-sm text-ivory">
+            Password updated — please sign in again.
+          </p>
+        )}
         <LoginForm next={next} />
       </div>
     </div>
