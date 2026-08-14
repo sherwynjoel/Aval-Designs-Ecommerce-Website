@@ -1,3 +1,6 @@
+// Homepage shows live catalog data (New Arrivals); refresh it periodically.
+export const revalidate = 300;
+
 import Hero from "@/components/sections/Hero";
 import NewArrivals from "@/components/sections/NewArrivals";
 import ShopByCategory from "@/components/sections/ShopByCategory";

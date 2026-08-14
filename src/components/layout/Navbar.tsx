@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AnnouncementBar from "./AnnouncementBar";
+import { readCart, cartCount, CART_EVENT } from "@/lib/cart";
 
 const links = [
   { label: "Home", href: "/" },
@@ -51,6 +52,28 @@ function BagIcon() {
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 8h12l-1 13H7L6 8z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 8V6a3 3 0 0 1 6 0v2" />
     </svg>
+  );
+}
+
+function CartCountBadge() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const sync = () => setCount(cartCount(readCart()));
+    sync();
+    window.addEventListener(CART_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(CART_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
+  if (count === 0) return null;
+  return (
+    <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-deep px-1 text-[0.6rem] font-medium text-ivory">
+      {count}
+    </span>
   );
 }
 
@@ -109,8 +132,9 @@ export default function Navbar() {
           <Link href="/wishlist" aria-label="Wishlist" className="hidden sm:inline-flex hover:text-rose-deep transition-colors">
             <HeartIcon />
           </Link>
-          <Link href="/cart" aria-label="Cart" className="inline-flex hover:text-rose-deep transition-colors">
+          <Link href="/cart" aria-label="Cart" className="relative inline-flex hover:text-rose-deep transition-colors">
             <BagIcon />
+            <CartCountBadge />
           </Link>
           <button
             type="button"

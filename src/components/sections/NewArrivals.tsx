@@ -1,8 +1,10 @@
 import Button from "@/components/ui/Button";
 import ProductCard from "@/components/ui/ProductCard";
-import { newArrivals } from "@/lib/products";
+import { getCatalogProducts } from "@/lib/catalog";
 
-export default function NewArrivals() {
+export default async function NewArrivals() {
+  const products = (await getCatalogProducts({ sort: "newest" })).slice(0, 6);
+
   return (
     <section className="mx-auto max-w-[1400px] px-6 py-20 lg:px-12 lg:py-28">
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -15,13 +17,13 @@ export default function NewArrivals() {
             collection.
           </p>
         </div>
-        <Button href="/new-arrivals" variant="secondary" className="shrink-0">
+        <Button href="/shop?sort=newest" variant="secondary" className="shrink-0">
           View All
         </Button>
       </div>
 
       <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3 lg:gap-x-8">
-        {newArrivals.map((product) => (
+        {products.map((product) => (
           <ProductCard key={product.slug} product={product} />
         ))}
       </div>

@@ -5,7 +5,7 @@ const kindClasses: Record<BadgeKind, string> = {
   bestseller: "bg-charcoal-ink text-ivory border border-charcoal-ink",
   limited: "bg-charcoal-ink text-ivory border border-charcoal-ink",
   sale: "bg-charcoal-ink text-ivory border border-charcoal-ink",
-  customizable: "bg-transparent text-rose-deep border border-rose-deep",
+  customizable: "bg-ivory/90 text-rose-deep border border-rose-deep",
 };
 
 const labels: Record<BadgeKind, string> = {

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import type { Product } from "@/lib/products";
 import Badge from "./Badge";
@@ -17,12 +18,17 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group">
       <div className="relative aspect-[3/4] overflow-hidden bg-beige-surface">
+        <Link
+          href={`/product/${product.slug}`}
+          className="absolute inset-0 z-0"
+          aria-label={product.name}
+        />
         <Image
           src={product.image}
           alt={product.name}
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-opacity duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:opacity-0"
+          className="pointer-events-none object-cover transition-opacity duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:opacity-0"
         />
         <Image
           src={product.hoverImage}
@@ -30,7 +36,7 @@ export default function ProductCard({ product }: { product: Product }) {
           aria-hidden
           fill
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover opacity-0 transition-opacity duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:opacity-100"
+          className="pointer-events-none object-cover opacity-0 transition-opacity duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:opacity-100"
         />
 
         <div className="absolute top-3 left-3 flex flex-col gap-2">
@@ -77,7 +83,11 @@ export default function ProductCard({ product }: { product: Product }) {
         <span className="text-xs uppercase tracking-[0.1em] text-charcoal-muted">
           {product.category}
         </span>
-        <h3 className="font-medium text-charcoal-ink">{product.name}</h3>
+        <h3 className="font-medium text-charcoal-ink">
+          <Link href={`/product/${product.slug}`} className="hover:text-rose-deep transition-colors">
+            {product.name}
+          </Link>
+        </h3>
         <div className="flex items-center gap-2">
           <span className="text-charcoal-ink">{inr.format(product.price)}</span>
           {product.originalPrice && (
