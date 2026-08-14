@@ -17,6 +17,7 @@ export type CheckoutPayload = {
   city: string;
   state: string;
   pincode: string;
+  measurementNotes?: string;
   items: CheckoutItem[];
 };
 
@@ -149,6 +150,7 @@ export async function placeOrderAction(payload: CheckoutPayload): Promise<Checko
             shippingCity: city,
             shippingState: state,
             shippingPincode: pincode,
+            customizationNotes: payload.measurementNotes?.trim().slice(0, 2000) || null,
             items: { create: itemsData },
           },
         }),

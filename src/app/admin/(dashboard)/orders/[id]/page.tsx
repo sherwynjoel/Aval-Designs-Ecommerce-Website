@@ -48,12 +48,31 @@ export default async function AdminOrderDetailPage({
             })}
           </p>
         </div>
-        <PaymentStatusBadge status={order.paymentStatus} />
+        <div className="flex items-center gap-5">
+          <Link
+            href={`/admin/orders/${order.id}/invoice`}
+            className="border border-charcoal-ink px-5 py-2 text-xs font-medium uppercase tracking-[0.12em] text-charcoal-ink hover:bg-charcoal-ink hover:text-ivory"
+          >
+            Invoice
+          </Link>
+          <PaymentStatusBadge status={order.paymentStatus} />
+        </div>
       </div>
 
       <div className="mt-8 bg-ivory p-6">
         <OrderTimeline status={order.status} />
       </div>
+
+      {order.customizationNotes && (
+        <div className="mt-6 bg-rose-pale/30 p-6">
+          <h2 className="text-xs font-medium uppercase tracking-[0.1em] text-rose-deep">
+            Customer Measurements &amp; Notes
+          </h2>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-charcoal-ink">
+            {order.customizationNotes}
+          </p>
+        </div>
+      )}
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">

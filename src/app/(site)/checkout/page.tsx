@@ -65,6 +65,7 @@ export default function CheckoutPage() {
       city: String(data.get("city") ?? ""),
       state: String(data.get("state") ?? ""),
       pincode: String(data.get("pincode") ?? ""),
+      measurementNotes: String(data.get("measurementNotes") ?? ""),
       items: items!.map((i) => ({
         slug: i.slug,
         size: i.size,
@@ -131,6 +132,20 @@ export default function CheckoutPage() {
                 <input id="pincode" name="pincode" required inputMode="numeric" pattern="\d{6}" className={field} />
               </div>
             </div>
+          </section>
+
+          <section className="flex flex-col gap-3">
+            <h2 className="font-display text-xl text-charcoal-ink">
+              Measurements &amp; Notes{" "}
+              <span className="text-sm font-normal text-charcoal-muted">(optional)</span>
+            </h2>
+            <textarea
+              name="measurementNotes"
+              rows={4}
+              maxLength={2000}
+              placeholder="For custom-fit pieces: bust, waist, hip, length — or anything our atelier should know. We'll confirm every measurement with you before stitching."
+              className="border border-charcoal-line bg-transparent px-3 py-2.5 text-sm text-charcoal-ink placeholder:text-charcoal-muted focus:border-charcoal-ink focus:outline-none"
+            />
           </section>
 
           <section className="flex flex-col gap-3">
