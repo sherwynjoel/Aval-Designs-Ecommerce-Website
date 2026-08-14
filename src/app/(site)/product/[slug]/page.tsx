@@ -18,10 +18,15 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product) return { title: "Product not found — Aval Designs" };
+  if (!product) return { title: "Product not found" };
   return {
-    title: `${product.name} — Aval Designs`,
+    title: product.name,
     description: product.description,
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      images: product.image ? [{ url: product.image }] : undefined,
+    },
   };
 }
 
@@ -36,8 +41,30 @@ export default async function ProductDetailPage({
 
   const totalStock = Object.values(product.sizes).reduce((a, b) => a + b, 0);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images,
+    category: product.category,
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "INR",
+      price: product.price,
+      availability:
+        totalStock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-10 lg:px-12 lg:py-14">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <nav aria-label="Breadcrumb" className="mb-8 text-xs uppercase tracking-[0.1em] text-charcoal-muted">
         <Link href="/shop" className="hover:text-charcoal-ink">
           Shop

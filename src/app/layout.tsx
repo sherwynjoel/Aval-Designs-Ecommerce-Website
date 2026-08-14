@@ -14,9 +14,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Aval Designs — Bridal & Occasion Wear, Made to Fit You",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: {
+    default: "Aval Designs — Bridal & Occasion Wear, Made to Fit You",
+    template: "%s — Aval Designs",
+  },
   description:
     "Aval Designs is a premium bridal and occasion-wear boutique offering ready pieces and full custom tailoring — measurements, fabric, and design, made for your exact fit.",
+  openGraph: {
+    siteName: "Aval Designs",
+    type: "website",
+    locale: "en_IN",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
